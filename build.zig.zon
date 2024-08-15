@@ -1,0 +1,10 @@
+.{
+    .name = "ztcod",
+    .version = "1.24.0",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "lib",
+        "src",
+    },
+}
