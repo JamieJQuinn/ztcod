@@ -1,4 +1,4 @@
-# ztcod v1.24.0 - Build package and bindings for [libtcod](https://github.com/libtcod/libtcod)
+# ztcod v2.0.0 - Build package and bindings for [libtcod](https://github.com/libtcod/libtcod)
 
 ## Caveats
 
@@ -8,12 +8,16 @@ I haven't tested many libtcod functions from Zig so cannot guarantee all binding
 
 ## Getting started
 
-Copy `ztcod` folder to a subdirectory of your project and add the following to your `build.zig.zon` .dependencies:
-```zig
-    .ztcod = .{ .path = "lib/ztcod" },
+1. Fetch ztcod and save to your dependencies:
+```bash
+zig fetch --save=ztcod git+https://github.com/jamiejquinn/ztcod#v2.0.0
+```
+or for the latest `main`:
+```bash
+zig fetch --save=ztcod git+https://github.com/jamiejquinn/ztcod#main
 ```
 
-Then in your `build.zig` add:
+2. Add to your `build.zig`:
 
 ```zig
 pub fn build(b: *std.Build) void {
