@@ -24,7 +24,17 @@ pub fn build(b: *std.Build) void {
     const exe = b.addExecutable(.{ ... });
 
     const ztcod = b.dependency("ztcod", .{});
-    exe.root_module.addImport("ctcod", ztcod.module("root"));
+    exe.root_module.addImport("ztcod", ztcod.module("root"));
     exe.linkLibrary(ztcod.artifact("tcod"));
 }
+```
+
+3. Import and use in your application:
+
+```zig
+const tcod = @import("ztcod");
+
+...
+
+const map = tcod.c.TCOD_map_new(...);
 ```
