@@ -1,10 +1,36 @@
 const std = @import("std");
 
-const tcod = @cImport({
-    @cInclude("libtcod.h");
-});
+const tcod = @import("ztcod");
 
-pub usingnamespace tcod;
+pub const map_t = opaque {};
+pub const dijkstra_t = opaque {};
+
+pub const map_new = TCOD_map_new;
+extern fn TCOD_map_new(width: usize, height: usize) *map_t;
+
+pub const map_delete = TCOD_map_delete;
+extern fn TCOD_map_delete(map: *map_t) void;
+
+pub const map_set_properties = TCOD_map_set_properties;
+extern fn TCOD_map_set_properties(map: *map_t, x: usize, y: usize, is_visible: bool, is_walkable: bool) void;
+
+pub const map_is_walkable = TCOD_map_is_walkable;
+extern fn TCOD_map_is_walkable(map: *map_t, x: usize, y: usize) bool;
+
+pub const dijkstra_new = TCOD_dijkstra_new;
+extern fn TCOD_dijkstra_new(map: *map_t, diagonal_cost: f32) *dijkstra_t;
+
+pub const dijkstra_delete = TCOD_dijkstra_delete;
+extern fn TCOD_dijkstra_delete(data: *dijkstra_t) void;
+
+pub const dijkstra_compute = TCOD_dijkstra_compute;
+extern fn TCOD_dijkstra_compute(data: *dijkstra_t, root_x: usize, root_y: usize) void;
+
+pub const dijkstra_path_set = TCOD_dijkstra_path_set;
+extern fn TCOD_dijkstra_path_set(data: *dijkstra_t, x: usize, y: usize) void;
+
+pub const dijkstra_path_walk = TCOD_dijkstra_path_walk;
+extern fn TCOD_dijkstra_path_walk(data: *dijkstra_t, x: *usize, y: *usize) bool;
 
 test "Running tcod functions" {
     const nx = 16;

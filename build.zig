@@ -4,9 +4,16 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
-    _ = b.addModule("root", .{
+    var root_module = b.addModule("root", .{
         .root_source_file = b.path("src/ztcod.zig"),
     });
+
+    const c_headers = b.addTranslateC(.{
+        .root_source_file = b.path("lib/libtcod/src/libtcod.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    root_module.addImport("ztcod", c_headers.createModule());
 
     const libtcod = b.addStaticLibrary(.{
         .name = "tcod",
@@ -90,7 +97,7 @@ pub fn build(b: *std.Build) !void {
     });
     b.installArtifact(tests);
 
-    tests.addIncludePath(b.path("lib/libtcod/src"));
+    tests.root_module.addImport("ztcod", c_headers.createModule());
     tests.linkLibrary(libtcod);
 
     test_step.dependOn(&b.addRunArtifact(tests).step);
