@@ -1,4 +1,4 @@
-# ztcod v2.0.0 - Build package and bindings for [libtcod](https://github.com/libtcod/libtcod)
+# ztcod - Build package and bindings for [libtcod](https://github.com/libtcod/libtcod)
 
 ## Caveats
 
@@ -8,9 +8,9 @@ I haven't tested many libtcod functions from Zig so cannot guarantee all binding
 
 ## Getting started
 
-1. Fetch ztcod and save to your dependencies:
+1. Fetch ztcod (replace <version> with desired version) and save to your dependencies:
 ```bash
-zig fetch --save=ztcod git+https://github.com/jamiejquinn/ztcod#v2.0.0
+zig fetch --save=ztcod git+https://github.com/jamiejquinn/ztcod#<version>
 ```
 or for the latest `main`:
 ```bash
@@ -24,7 +24,7 @@ pub fn build(b: *std.Build) void {
     const exe = b.addExecutable(.{ ... });
 
     const ztcod = b.dependency("ztcod", .{});
-    exe.root_module.addImport("ztcod", ztcod.module("root"));
+    exe.root_module.addImport("ctcod", ztcod.module("root"));
     exe.linkLibrary(ztcod.artifact("tcod"));
 }
 ```
