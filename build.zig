@@ -10,7 +10,7 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    var root_module = b.createModule(.{
+    var root_module = b.addModule("root", .{
         .root_source_file = b.path("src/ztcod.zig"),
         .target = target,
         .optimize = optimize,
