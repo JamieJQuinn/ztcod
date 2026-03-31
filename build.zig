@@ -10,22 +10,28 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    var root_module = b.addModule("root", .{
+    var root_module = b.createModule(.{
         .root_source_file = b.path("src/ztcod.zig"),
-    });
-    root_module.addImport("c_translate_tcod", c_headers.createModule());
-
-    const libtcod = b.addStaticLibrary(.{
-        .name = "tcod",
         .target = target,
         .optimize = optimize,
     });
+    root_module.addImport("c_translate_tcod", c_headers.createModule());
+
+    const libtcod = b.addLibrary(.{
+        .name = "tcod",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/ztcod.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
+    });
+
     libtcod.linkLibC();
     libtcod.addIncludePath(b.path("lib/libtcod/src"));
     libtcod.addIncludePath(b.path("lib/libtcod/src/vendor"));
     libtcod.addIncludePath(b.path("lib/libtcod/src/vendor/utf8proc"));
-    var c_srcs = std.ArrayList([]const u8).init(b.allocator);
-    try c_srcs.appendSlice(&.{ 
+    var c_srcs = std.ArrayListUnmanaged([]const u8){};
+    try c_srcs.appendSlice(b.allocator, &.{ 
         "lib/libtcod/src/libtcod/bresenham_c.c",
         "lib/libtcod/src/libtcod/bsp_c.c",
         "lib/libtcod/src/libtcod/color.c",
@@ -91,9 +97,11 @@ pub fn build(b: *std.Build) !void {
 
     const tests = b.addTest(.{
         .name = "ztcod-tests",
-        .root_source_file = b.path("src/ztcod.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/ztcod.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     b.installArtifact(tests);
 
