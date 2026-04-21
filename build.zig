@@ -23,15 +23,14 @@ pub fn build(b: *std.Build) !void {
             .root_source_file = b.path("src/ztcod.zig"),
             .target = target,
             .optimize = optimize,
+            .link_libc = true,
         }),
     });
 
-    libtcod.linkLibC();
-    libtcod.addIncludePath(b.path("lib/libtcod/src"));
-    libtcod.addIncludePath(b.path("lib/libtcod/src/vendor"));
-    libtcod.addIncludePath(b.path("lib/libtcod/src/vendor/utf8proc"));
-    var c_srcs = std.ArrayListUnmanaged([]const u8){};
-    try c_srcs.appendSlice(b.allocator, &.{ 
+    libtcod.root_module.addIncludePath(b.path("lib/libtcod/src"));
+    libtcod.root_module.addIncludePath(b.path("lib/libtcod/src/vendor"));
+    libtcod.root_module.addIncludePath(b.path("lib/libtcod/src/vendor/utf8proc"));
+    inline for(&.{ 
         "lib/libtcod/src/libtcod/bresenham_c.c",
         "lib/libtcod/src/libtcod/bsp_c.c",
         "lib/libtcod/src/libtcod/color.c",
@@ -84,9 +83,8 @@ pub fn build(b: *std.Build) !void {
         "lib/libtcod/src/libtcod/zip_c.c",
         "lib/libtcod/src/vendor/stb.c",
         "lib/libtcod/src/vendor/lodepng.c",
-    });
-    for(c_srcs.items) |src| {
-        libtcod.addCSourceFile(.{
+    }) |src| {
+        libtcod.root_module.addCSourceFile(.{
             .file = b.path(src),
             .flags = &.{ "-fno-sanitize=undefined", "-DNO_SDL=1", "-Wdeprecated-declarations" },
         });
@@ -106,7 +104,7 @@ pub fn build(b: *std.Build) !void {
     b.installArtifact(tests);
 
     tests.root_module.addImport("c_translate_tcod", c_headers.createModule());
-    tests.linkLibrary(libtcod);
+    tests.root_module.linkLibrary(libtcod);
 
     test_step.dependOn(&b.addRunArtifact(tests).step);
 }
