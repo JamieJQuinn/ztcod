@@ -4,14 +4,38 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
+    // const translate_c = b.addTranslateC(.{
+    //     .root_source_file = b.path("lib/libtcod/src/libtcod.h"),
+    //     .target = target,
+    //     .optimize = optimize,
+    // });
+    //
+    // const translate_pragma_fix = b.addTranslateC(.{
+    //     .root_source_file = b.path("include/pragma_fix.h"),
+    //     .target = target,
+    //     .optimize = optimize,
+    // });
+
+    const root_module = b.addModule("root", .{
+        .root_source_file = b.path("src/ztcod.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+        // .imports = &.{
+        //     .{
+        //         .name = "pragma_fix",
+        //         .module = translate_pragma_fix.createModule(),
+        //     },
+        //     .{
+        //         .name = "c",
+        //         .module = translate_c.createModule(),
+        //     },
+        // },
+    });
+
     const libtcod = b.addLibrary(.{
         .name = "tcod",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/ztcod.zig"),
-            .target = target,
-            .optimize = optimize,
-            .link_libc = true,
-        }),
+        .root_module = root_module,
     });
 
     libtcod.root_module.addIncludePath(b.path("include"));
