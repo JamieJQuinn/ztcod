@@ -6,7 +6,7 @@
     .paths = .{
         "build.zig",
         "build.zig.zon",
-        "lib",
+        "lib/libtcod",
         "src",
     },
 }
