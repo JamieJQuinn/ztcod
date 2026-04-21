@@ -1,6 +1,10 @@
 const std = @import("std");
 
-pub const c = @import("c_translate_tcod");
+// pub const c = @import("c_translate_tcod");
+pub const c = @cImport({
+    @cInclude("pragma_fix.h");
+    @cInclude("libtcod.h");
+});
 
 test "Running tcod functions" {
     const nx = 16;

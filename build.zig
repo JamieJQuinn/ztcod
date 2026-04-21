@@ -4,19 +4,6 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
-    const c_headers = b.addTranslateC(.{
-        .root_source_file = b.path("lib/libtcod/src/libtcod.h"),
-        .target = target,
-        .optimize = optimize,
-    });
-
-    var root_module = b.addModule("root", .{
-        .root_source_file = b.path("src/ztcod.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    root_module.addImport("c_translate_tcod", c_headers.createModule());
-
     const libtcod = b.addLibrary(.{
         .name = "tcod",
         .root_module = b.createModule(.{
@@ -27,6 +14,7 @@ pub fn build(b: *std.Build) !void {
         }),
     });
 
+    libtcod.root_module.addIncludePath(b.path("include"));
     libtcod.root_module.addIncludePath(b.path("lib/libtcod/src"));
     libtcod.root_module.addIncludePath(b.path("lib/libtcod/src/vendor"));
     libtcod.root_module.addIncludePath(b.path("lib/libtcod/src/vendor/utf8proc"));
@@ -103,8 +91,9 @@ pub fn build(b: *std.Build) !void {
     });
     b.installArtifact(tests);
 
-    tests.root_module.addImport("c_translate_tcod", c_headers.createModule());
     tests.root_module.linkLibrary(libtcod);
+    tests.root_module.addIncludePath(b.path("include"));
+    tests.root_module.addIncludePath(b.path("lib/libtcod/src"));
 
     test_step.dependOn(&b.addRunArtifact(tests).step);
 }
