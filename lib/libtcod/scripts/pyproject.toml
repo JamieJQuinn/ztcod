@@ -1,0 +1,14 @@
+[tool.ruff] # https://docs.astral.sh/ruff/rules/
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "E501", # line-too-long
+    "S101", # assert
+    "T20",  # flake8-print
+]
+
+[tool.ruff.lint.pydocstyle] # https://docs.astral.sh/ruff/settings/#lintpydocstyle
+convention = "google"
