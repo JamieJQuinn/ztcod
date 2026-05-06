@@ -4,45 +4,31 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
-    // const translate_c = b.addTranslateC(.{
-    //     .root_source_file = b.path("lib/libtcod/src/libtcod.h"),
-    //     .target = target,
-    //     .optimize = optimize,
-    // });
-    //
-    // const translate_pragma_fix = b.addTranslateC(.{
-    //     .root_source_file = b.path("include/pragma_fix.h"),
-    //     .target = target,
-    //     .optimize = optimize,
-    // });
-
-    const root_module = b.addModule("root", .{
-        .root_source_file = b.path("src/ztcod.zig"),
+    const c = b.addTranslateC(.{
+        .root_source_file = b.path("include/pragma_fix.h"),
         .target = target,
         .optimize = optimize,
-        .link_libc = true,
-        // .imports = &.{
-        //     .{
-        //         .name = "pragma_fix",
-        //         .module = translate_pragma_fix.createModule(),
-        //     },
-        //     .{
-        //         .name = "c",
-        //         .module = translate_c.createModule(),
-        //     },
-        // },
     });
+
+    c.addIncludePath(b.path("lib/libtcod/src"));
+    const c_mod = c.addModule("root");
 
     const libtcod = b.addLibrary(.{
         .name = "tcod",
-        .root_module = root_module,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+        .linkage = .static,
+        .use_llvm = true,
     });
 
     libtcod.root_module.addIncludePath(b.path("include"));
     libtcod.root_module.addIncludePath(b.path("lib/libtcod/src"));
     libtcod.root_module.addIncludePath(b.path("lib/libtcod/src/vendor"));
     libtcod.root_module.addIncludePath(b.path("lib/libtcod/src/vendor/utf8proc"));
-    inline for(&.{ 
+    inline for (&.{
         "lib/libtcod/src/libtcod/bresenham_c.c",
         "lib/libtcod/src/libtcod/bsp_c.c",
         "lib/libtcod/src/libtcod/color.c",
@@ -103,21 +89,24 @@ pub fn build(b: *std.Build) !void {
     }
     b.installArtifact(libtcod);
 
-    const test_step = b.step("test", "Run tests");
-
     const tests = b.addTest(.{
         .name = "ztcod-tests",
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/ztcod.zig"),
             .target = target,
             .optimize = optimize,
+            .imports = &.{
+                .{
+                    .name = "ztcod",
+                    .module = c_mod,
+                },
+            },
         }),
+        .use_llvm = true, // avoid linker error https://codeberg.org/ziglang/zig/issues/31272
     });
-    b.installArtifact(tests);
 
     tests.root_module.linkLibrary(libtcod);
-    tests.root_module.addIncludePath(b.path("include"));
-    tests.root_module.addIncludePath(b.path("lib/libtcod/src"));
 
+    const test_step = b.step("test", "Run tests");
     test_step.dependOn(&b.addRunArtifact(tests).step);
 }
